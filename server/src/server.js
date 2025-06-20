@@ -7,9 +7,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
+app.use(express.json());
 app.use('/api/auth', authRouter);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-    connectDB();
-})
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB failed:", err.message);
+    process.exit(1);
+  });

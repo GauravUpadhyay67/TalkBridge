@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,19 +20,18 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+//  hash password before saving
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 const User = mongoose.model("User", userSchema);
-
-// pre hook(help to generate and store the hashed version of password)
-userSchema.pre('save', async function(next) {
-    if(!this.isModified('password')) return next();
-
-    try {
-        const salt = await bycrypt.genSalt(10);
-        this.password = await bycrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
-})
-
 export default User;
