@@ -1,5 +1,6 @@
-import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import { upsertStreamUser } from "../configs/stream.js";
+import User from "../models/User.js";
 
 export const signup = async (req, res) => {
     const { email, password, fullName } = req.body;
@@ -35,6 +36,17 @@ export const signup = async (req, res) => {
             profilePic: randomAvatar
         })
 
+        try {
+            // Upsert user in Stream
+            await upsertStreamUser({
+                id: newUser._id.toString(),
+                name: newUser.fullName,
+                image: newUser.profilePic || 'https://default-avatar-url.com/default.png' 
+            });
+        } catch (error) {
+            console.error('Error upserting Stream user:', error);
+        }
+
         const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
             expiresIn: '7d'
         });
@@ -55,9 +67,43 @@ export const signup = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-    res.send('Login Route..');
+    try {
+        const { email, password } = req.body;
+
+        if(!email || !password){
+            return res.status(401).json({ message: 'All fields are required' });
+        }
+
+        const user = await User.findOne({ email });
+        if(!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const isPasswordValid = await user.comparePassword(password);
+        if(!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+        
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+            expiresIn: '7d'
+        });
+
+        res.cookie("jwt", token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict' 
+        })
+
+        res.status(200).json({ success: true, message: 'User logged in successfully', user, token });
+
+
+    } catch (error) {
+        
+    }
 }
 
 export const logout = async (req, res) => {
-    res.send('Logout Route..');
+    res.clearCookie("jwt");
+    res.status(200).json({ success: true, message: 'User logged out successfully' });
 }
