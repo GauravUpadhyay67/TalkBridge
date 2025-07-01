@@ -4,6 +4,7 @@ import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import connectDB from "./configs/mongodb.js";
 import cookieParser from 'cookie-parser';
+import chatRouter from "./routes/chatRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(cookieParser())
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/chat', chatRouter);
 
 connectDB()
   .then(() => {
