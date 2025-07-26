@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { signup } from "../lib/api";
+import useSignUp from "../hooks/useSignUp";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -11,12 +10,7 @@ const SignUpPage = () => {
     password: "",
   });
 
-  const queryClient = useQueryClient();
-
-  const { mutate:signupMutation, isPending, error } = useMutation({
-    mutationFn: signup,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['authUser']}),
-  })
+  const { error, isPending, signupMutation } = useSignUp();
 
   const handleSignup = (e) => {
     e.preventDefault();
@@ -163,7 +157,7 @@ const SignUpPage = () => {
           </div>
         </div>
 
-        {/* Signup Form - Right Side */}
+        {/* Illustration - Right Side */}
         <div className="hidden lg:flex w-full lg:w-1/2 items-center justify-center bg-gradient-to-br from-[#1e293b] to-[#312e81] rounded-r-xl">
           <div className="max-w-md p-8">
             <div className="relative aspect-square max-w-sm mx-auto">
