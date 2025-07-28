@@ -12,15 +12,18 @@ const userSchema = new mongoose.Schema(
     learningLanguage: { type: String, default: "" },
     location: { type: String, default: "" },
     isOnboarded: { type: Boolean, default: false },
+    
+    // ✅ Correct friends field (Array of User ObjectIds)
     friends: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
+      default: []
     },
   },
   { timestamps: true }
 );
 
-//  hash password before saving
+// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -39,7 +42,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   } catch (error) {
     throw new Error("Password comparison failed");
   }
-} 
+};
 
 const User = mongoose.model("User", userSchema);
 export default User;
