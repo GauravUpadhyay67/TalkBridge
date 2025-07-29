@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { CheckCircleIcon, MapPinIcon, UserIcon, UserPlusIcon } from "lucide-react";
 import { FriendCard, getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
+import { capitalize } from "../lib/utils";
 
 
 const HomePage = () => {
@@ -159,4 +160,3 @@ const HomePage = () => {
 
 export default HomePage
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1); 
