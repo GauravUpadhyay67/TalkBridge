@@ -10,7 +10,7 @@ import {
   ShuffleIcon,
 } from "lucide-react";
 import { completeOnboarding } from "../lib/api";
-import { LANGUAGES } from "../constants";
+import { DEFAULT_AVATAR_URL, LANGUAGES } from "../constants";
 
 const OnboardingPage = () => {
   const { authUser } = useAuthUser();
@@ -22,7 +22,7 @@ const OnboardingPage = () => {
     nativeLanguage: authUser?.nativeLanguage || "",
     learningLanguage: authUser?.learningLanguage || "",
     location: authUser?.location || "",
-    profilePic: authUser?.profilePic || "",
+    profilePic: authUser?.profilePic || DEFAULT_AVATAR_URL,
   });
 
   const { mutate: onboardingMutation, isPending } = useMutation({

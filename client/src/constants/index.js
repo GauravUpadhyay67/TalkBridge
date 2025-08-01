@@ -195,3 +195,7 @@ export const LANGUAGE_TO_FLAG = {
   turkish: "tr",
   dutch: "nl",
 };
+
+
+export const DEFAULT_AVATAR_URL = "https://www.gravatar.com/avatar/?d=mp&f=y";
+
