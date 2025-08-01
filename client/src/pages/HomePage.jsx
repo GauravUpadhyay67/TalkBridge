@@ -1,78 +1,114 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { use, useEffect, useState } from "react";
-import { getOutgoingFriendReqs, getRecomendedUsers, getUserFriends, sendFriendRequest } from "../lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+  getOutgoingFriendReqs,
+  getRecomendedUsers,
+  getUserFriends,
+  sendFriendRequest
+} from "../lib/api";
 import { Link } from "react-router-dom";
-import { CheckCircleIcon, MapPinIcon, UserIcon, UserPlusIcon } from "lucide-react";
+import {
+  CheckCircleIcon,
+  MapPinIcon,
+  UserIcon,
+  UserPlusIcon
+} from "lucide-react";
 import { FriendCard, getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
 import { capitalize } from "../lib/utils";
 
-
 const HomePage = () => {
   const queryClient = useQueryClient();
-  const [ outgoingRequestsIds, setOutgoingRequestsIds ] = useState(new Set());
+  const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
+  const [sendingToUserId, setSendingToUserId] = useState(null);
 
-  const {data:friends=[], isLoading:loadingFriends } = useQuery({
-    queryKey: ['friends'],
-    queryFn: getUserFriends,
+  const {
+    data: friends = [],
+    isLoading: loadingFriends
+  } = useQuery({
+    queryKey: ["friends"],
+    queryFn: getUserFriends
   });
 
-  const {data:recomendedUsers=[], isLoading:loadingUsers } = useQuery({
-    queryKey: ['users'],
-    queryFn: getRecomendedUsers,
+  const {
+    data: recomendedUsers = [],
+    isLoading: loadingUsers
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: getRecomendedUsers
   });
 
-  const {data: outgoingFriendReqs } = useQuery({
-    queryKey: ['outgoingFriendReqs'],
-    queryFn: getOutgoingFriendReqs,
+  const { data: outgoingFriendReqs } = useQuery({
+    queryKey: ["outgoingFriendReqs"],
+    queryFn: getOutgoingFriendReqs
   });
 
-  const {mutate:sendRequestMutation, isPending } = useMutation({
+  const { mutate: sendRequestMutation } = useMutation({
     mutationFn: sendFriendRequest,
-    onSuccess: () => queryClient.invalidateQueries({queryKey: ['outgoingFriendReqs']}),
+    onMutate: (userId) => {
+      setSendingToUserId(userId);
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] }),
+    onSettled: () => {
+      setSendingToUserId(null);
+    }
   });
 
   useEffect(() => {
-    const outgoingIds = new Set()
-
-    if(outgoingFriendReqs && outgoingFriendReqs.length > 0){
+    const outgoingIds = new Set();
+    if (outgoingFriendReqs?.length > 0) {
       outgoingFriendReqs.forEach((req) => {
-        outgoingIds.add(req.recipient._id)
-      })
-      setOutgoingRequestsIds(outgoingIds)
+        outgoingIds.add(req.recipient._id);
+      });
     }
-  }, [outgoingFriendReqs])
+    setOutgoingRequestsIds(outgoingIds);
+  }, [outgoingFriendReqs]);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
-        <div className=" flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Friends */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
-          <Link to='/notifications' className="btn btn-outline btn-sm">
-            <UserIcon className="mr-2 size-4"/>
+          <Link to="/notifications" className="btn btn-outline btn-sm">
+            <UserIcon className="mr-2 size-4" />
             Friend Requests
           </Link>
         </div>
 
         {loadingFriends ? (
           <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg"/>
+            <span className="loading loading-spinner loading-lg" />
           </div>
         ) : friends.length === 0 ? (
-          <NoFriendsFound/>
+          <NoFriendsFound />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {friends.map((friend) => (
-              <FriendCard key={friend._id} friend={friend}/>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {friends.slice(0, 4).map((friend) => (
+                <FriendCard key={friend._id} friend={friend} />
+              ))}
+            </div>
+
+            {friends.length > 4 && (
+              <div className="flex justify-center mt-4">
+                <Link to="/friends" className="btn btn-outline btn-sm">
+                  View All Friends
+                </Link>
+              </div>
+            )}
+          </>
         )}
 
+        {/* Recommended Users */}
         <section>
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Meet New Learners</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Meet New Learners
+                </h2>
                 <p className="opacity-70">
                   Discover perfect language exchange partners based on your profile
                 </p>
@@ -95,68 +131,78 @@ const HomePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recomendedUsers.map((user) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
+                const isSending = sendingToUserId === user._id;
+
                 return (
-                  <div key={user._id} className="card bg-base-200 hover:shadow-lg transition-all duration-300">
+                  <div
+                    key={user._id}
+                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
+                  >
                     <div className="card-body p-5 space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="avatar size-16 rounded-full">
-                          <img
-                            src={user.profilePic}
-                            alt={user.fullName}
-                          />
+                          <img src={user.profilePic} alt={user.fullName} />
                         </div>
 
                         <div>
                           <h3 className="font-semibold text-lg">{user.fullName}</h3>
                           {user.location && (
                             <div className="flex items-center text-xs opacity-70 mt-1">
-                              <MapPinIcon className="size-3 mr-1"/>
+                              <MapPinIcon className="size-3 mr-1" />
                               {user.location}
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Langs with Flags */}
-                      <div className='flex flex-wrap gap-1.5'>
-                        <span className='badge badge-secondary'>
-                            {getLanguageFlag(user.nativeLanguage)}
-                            Native: {capitalize(user.nativeLanguage)}
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="badge badge-secondary">
+                          {getLanguageFlag(user.nativeLanguage)}
+                          Native: {capitalize(user.nativeLanguage)}
                         </span>
-
-                        <span className='badge badge-outline'>
-                            {getLanguageFlag(user.learningLanguage)}
-                            Learning: {capitalize(user.learningLanguage)}
+                        <span className="badge badge-outline">
+                          {getLanguageFlag(user.learningLanguage)}
+                          Learning: {capitalize(user.learningLanguage)}
                         </span>
                       </div>
 
-                      {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
+                      {user.bio && (
+                        <p className="text-sm opacity-70">{user.bio}</p>
+                      )}
 
-                      {/* Action button */}
-                      <button className={`btn w-full mt-2 ${ hasRequestBeenSent ? 'btn-disabled' : 'btn-primary'}`} onClick={() => sendRequestMutation(user._id)} disabled={hasRequestBeenSent || isPending}>
-                        { hasRequestBeenSent ? (
+                      <button
+                        className={`btn w-full mt-2 ${
+                          hasRequestBeenSent || isSending
+                            ? "btn-disabled"
+                            : "btn-primary"
+                        }`}
+                        onClick={() => sendRequestMutation(user._id)}
+                        disabled={hasRequestBeenSent || isSending}
+                      >
+                        {isSending ? (
+                          <span className="loading loading-spinner loading-sm" />
+                        ) : hasRequestBeenSent ? (
                           <>
-                            <CheckCircleIcon className="size-4 mr-2"/>
+                            <CheckCircleIcon className="size-4 mr-2" />
                             Request Sent
                           </>
                         ) : (
                           <>
-                            <UserPlusIcon className="size-4 mr-2"/>
+                            <UserPlusIcon className="size-4 mr-2" />
                             Send Friend Request
                           </>
                         )}
                       </button>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
         </section>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
-
+export default HomePage;
