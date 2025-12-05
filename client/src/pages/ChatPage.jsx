@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import useAuthUser from '../hooks/useAuthUser';
 import { useQuery } from '@tanstack/react-query';
-import { getStreamToken } from '../lib/api';
-import { Channel, ChannelHeader, Chat, MessageInput, MessageList, Thread, Window } from 'stream-chat-react';
-import { StreamChat } from 'stream-chat';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import ChatLoader from '../components/ChatLoader';
+import { useParams } from 'react-router-dom';
+import { StreamChat } from 'stream-chat';
+import { Channel, ChannelHeader, Chat, MessageInput, MessageList, Thread, Window } from 'stream-chat-react';
 import CallButton from '../components/CallButton';
+import ChatLoader from '../components/ChatLoader';
+import TranslationButton from '../components/TranslationButton';
+import TranslationHelper from '../components/TranslationHelper';
+import useAuthUser from '../hooks/useAuthUser';
+import { getStreamToken } from '../lib/api';
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
@@ -77,6 +79,8 @@ const ChatPage = () => {
     }
   }
 
+  const [showTranslationHelper, setShowTranslationHelper] = useState(false);
+
   if(loading || !chatClient || !channel) return <ChatLoader/>;
 
   return (
@@ -85,6 +89,7 @@ const ChatPage = () => {
       <Channel channel={channel}>
         <div className="w-full relative">
           <CallButton handleVideoCall={handleVideoCall}/>
+          <TranslationButton onClick={() => setShowTranslationHelper(true)} />
           <Window>
             <ChannelHeader />
             <MessageList />
@@ -94,8 +99,9 @@ const ChatPage = () => {
         <Thread />
       </Channel>
     </Chat>
+    {showTranslationHelper && <TranslationHelper onClose={() => setShowTranslationHelper(false)} />}
   </div>
 );
 }
 
-export default ChatPage
+export default ChatPage;

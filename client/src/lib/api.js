@@ -64,3 +64,35 @@ export async function getStreamToken() {
     const response = await axiosInstance.get('/chat/token');
     return response.data;
 }
+
+// Language Practice Features
+export async function getDailyPrompt() {
+    const response = await axiosInstance.get('/language/prompt');
+    return response.data;
+}
+
+export async function getWordOfTheDay(language) {
+    const response = await axiosInstance.get('/language/word-of-day', {
+        params: { language }
+    });
+    return response.data;
+}
+
+export async function translateText(text, sourceLang, targetLang) {
+    const response = await axiosInstance.post('/language/translate', {
+        text,
+        sourceLang,
+        targetLang
+    });
+    return response.data;
+}
+
+export async function updateOnlineStatus(isOnline) {
+    const response = await axiosInstance.put('/users/status', { isOnline });
+    return response.data;
+}
+
+export async function updateProfile(data) {
+    const response = await axiosInstance.put('/users/profile', data);
+    return response.data;
+}

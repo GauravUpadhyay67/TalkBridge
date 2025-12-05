@@ -1,8 +1,8 @@
-import useAuthUser from '../hooks/useAuthUser'
+import { Bell, LogOut, ShipWheel } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { BellIcon, LogOutIcon, ShipWheelIcon } from 'lucide-react';
-import ThemeSelector from './ThemeSelector';
+import useAuthUser from '../hooks/useAuthUser';
 import useLogout from '../hooks/useLogout';
+import ThemeSelector from './ThemeSelector';
 
 const Navbar = () => {
   const { authUser } = useAuthUser();
@@ -19,7 +19,7 @@ const Navbar = () => {
           {isChatPage && (
             <div className='pl-5'>
               <Link to='/' className='flex items-center gap-2.5'>
-                <ShipWheelIcon className='size-9 text-primary'/>
+                <ShipWheel className='size-9 text-primary'/>
                 <span className='text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider'>
                     TalkBridge
                 </span>
@@ -30,22 +30,21 @@ const Navbar = () => {
           <div className='flex items-center gap-3 sm:gap-4 ml-auto'>
             <Link to='/notifications'>
               <button className='btn btn-ghost btn-circle'>
-                <BellIcon className='h-6 w-6 text-base-content opacity-70'/>
+                <Bell className='h-6 w-6 text-base-content opacity-70'/>
               </button>
             </Link>
           </div>
 
-          {/* Not implemented yet */}
           <ThemeSelector/>
 
-          <div className='avatar'>
+          <Link to='/profile' className='avatar hover:opacity-80 transition-opacity'>
             <div className="w-9 rounded-full">
-              <img src={authUser?.profilePic} alt="User Avatar" rel='noreferrer' />
+              <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" />
             </div>
-          </div>
+          </Link>
 
           <button className='btn btn-ghost btn-circle' onClick={logoutMutation}>
-            <LogOutIcon className='h-6 w-6 text-base-content opacity-70'/>
+            <LogOut className='h-6 w-6 text-base-content opacity-70'/>
           </button>
 
         </div>

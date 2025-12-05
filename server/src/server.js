@@ -1,13 +1,15 @@
-import express from "express";
-import dotenv from "dotenv";
 import cors from 'cors';
+import dotenv from "dotenv";
+import express from "express";
 import path from 'path';
 
-import authRouter from "./routes/authRoutes.js";
-import userRouter from "./routes/userRoutes.js";
-import connectDB from "./configs/mongodb.js";
 import cookieParser from 'cookie-parser';
+import connectDB from "./configs/mongodb.js";
+import { seedConversationPrompts, seedWordsOfTheDay } from "./controllers/languageController.js";
+import authRouter from "./routes/authRoutes.js";
 import chatRouter from "./routes/chatRoutes.js";
+import languageRouter from "./routes/languageRoutes.js";
+import userRouter from "./routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -25,6 +27,7 @@ app.use(cookieParser())
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/language', languageRouter);
 
 if(process.env.NODE_ENV === 'production'){
   app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -35,7 +38,11 @@ if(process.env.NODE_ENV === 'production'){
 }
 
 connectDB()
-  .then(() => {
+  .then(async () => {
+    // Seed initial data
+    await seedConversationPrompts();
+    await seedWordsOfTheDay();
+    
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

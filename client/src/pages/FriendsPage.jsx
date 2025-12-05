@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUserFriends } from "../lib/api";
+import { RefreshCcw } from "lucide-react";
+import { useState } from "react";
 import { FriendCard } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
-import { useState } from "react";
-import { RefreshCcwIcon } from "lucide-react";
+import { getUserFriends } from "../lib/api";
 
 const FriendsPage = () => {
   const [search, setSearch] = useState("");
@@ -35,7 +35,7 @@ const FriendsPage = () => {
             className="btn btn-outline btn-sm flex items-center"
             disabled={isFetching}
           >
-            <RefreshCcwIcon className="size-4 mr-2" />
+            <RefreshCcw className="size-4 mr-2" />
             {isFetching ? "Refreshing..." : "Refresh"}
           </button>
         </div>

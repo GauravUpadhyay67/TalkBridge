@@ -1,17 +1,20 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "./pages/HomePage.jsx";
-import SignUpPage from "./pages/SignUpPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import OnboardingPage from "./pages/OnboardingPage.jsx";
-import NotificationsPage from "./pages/NotificationsPage.jsx";
-import ChatPage from "./pages/ChatPage.jsx";
-import CallPage from "./pages/CallPage.jsx";
+import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout.jsx";
 import PageLoader from "./components/PageLoader.jsx";
 import useAuthUser from "./hooks/useAuthUser.js";
-import Layout from "./components/Layout.jsx";
-import { useThemeStore } from "./store/useThemeStore.js";
+import CallPage from "./pages/CallPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
 import FriendsPage from "./pages/FriendsPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import NotificationsPage from "./pages/NotificationsPage.jsx";
+import OnboardingPage from "./pages/OnboardingPage.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import SignUpPage from "./pages/SignUpPage.jsx";
+import { useThemeStore } from "./store/useThemeStore.js";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
@@ -19,6 +22,11 @@ const App = () => {
 
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
+
+  // Apply theme to document element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   if (isLoading) return <PageLoader />;
 
@@ -33,7 +41,11 @@ const App = () => {
                 <HomePage />
               </Layout>
             ) : (
-              <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              !isAuthenticated ? (
+                <LandingPage />
+              ) : (
+                <Navigate to="/onboarding" />
+              )
             )
           }
         />
@@ -102,6 +114,18 @@ const App = () => {
           element={
             isAuthenticated && isOnboarded ? (
               <CallPage />
+            ) : (
+              <Navigate to={!isAuthenticated ? '/login' : '/onboarding'} />
+            )
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            isAuthenticated && isOnboarded ? (
+              <Layout showSidebar={true}>
+                <ProfilePage />
+              </Layout>
             ) : (
               <Navigate to={!isAuthenticated ? '/login' : '/onboarding'} />
             )

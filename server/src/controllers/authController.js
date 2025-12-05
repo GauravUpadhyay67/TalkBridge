@@ -19,6 +19,10 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Invalid email format" });
         }
 
+        if (!email.endsWith("@gmail.com")) {
+            return res.status(400).json({ message: "Only Gmail accounts are allowed" });
+        }
+
         const existingUser = await User.findOne({ email });
 
         if(existingUser) {

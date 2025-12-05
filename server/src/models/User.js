@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -12,6 +12,14 @@ const userSchema = new mongoose.Schema(
     learningLanguage: { type: String, default: "" },
     location: { type: String, default: "" },
     isOnboarded: { type: Boolean, default: false },
+    
+    // Enhanced matching fields
+    interests: { type: [String], default: [] },
+    learningGoals: { type: [String], default: [] },
+    proficiencyLevel: { type: String, enum: ["beginner", "intermediate", "advanced"], default: "beginner" },
+    timezone: { type: String, default: "" },
+    isOnline: { type: Boolean, default: false },
+    lastSeen: { type: Date, default: Date.now },
     
     // ✅ Correct friends field (Array of User ObjectIds)
     friends: {
